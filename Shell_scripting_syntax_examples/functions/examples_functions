@@ -1,0 +1,43 @@
+# lsext displays long list of files of the given extension
+function lsext()
+{
+find . -type f -iname '*.'${1}'' -exec ls -l {} \; ;
+}
+
+# batchexec executes a given linux command on a group of files
+function batchexec()
+{
+find . -type f -iname '*.'${1}'' -exec ${@:2}  {} \; ;
+}
+
+# rpass generate a random password with a specified length
+function rpass() {
+        cat /dev/urandom | tr -cd '[:graph:]' | head -c ${1:-12}
+}
+
+# getip displays the ipaddress of a given interface
+function getip()
+{
+/sbin/ifconfig ${1:-eth0} | awk '/inet addr/ {print $2}' | awk -F: '{print $2}';
+}
+
+# mach displays the basic information about the system
+function mach()
+{
+    echo -e "\nMachine information:" ; uname -a
+    echo -e "\nUsers logged on:" ; w -h
+    echo -e "\nCurrent date :" ; date
+    echo -e "\nMachine status :" ; uptime
+    echo -e "\nMemory status :" ; free
+    echo -e "\nFilesystem status :"; df -h
+}
+
+# ll function formats the ls -l output better
+function ll ()
+{
+    clear;
+    tput cup 0 0;
+    ls --color=auto -F --color=always -lhFrt;
+    tput cup 40 0;
+}
+

@@ -1,0 +1,89 @@
+http://www.admin-magazine.com/Articles/Automating-with-Expect-Scripts
+http://www.admin-magazine.com/Articles/Automating-with-Expect-Scripts
+https://srvfail.com/how-to-provide-ssh-password-inside-a-script-or-oneliner/
+https://www.pantz.org/software/expect/expect_examples_and_tips.html
+https://www.tcl.tk/man/expect5.31/expect.1.html
+
+vim /ssh.exp
+#!/usr/bin/expect
+
+set timeout 20
+
+set ip [lindex $argv 0]
+
+set user [lindex $argv 1]
+
+set password [lindex $argv 2]
+
+spawn ssh "$user\@$ip"
+
+expect "Password:"
+
+send "$password\r";
+
+interact
+
+
+./ssh.exp 192.168.1.2 root password
+
+
+
+Example #1.
+The first example will be logging into a linux box with ssh to see if the given accounts password works. By doing this we are also checking other things like if your machine is up and if you can login to it and get a prompt back. So in actuality this script does a bunch of things.
+
+#!/usr/bin/expect
+set timeout 9
+set username [lindex $argv 0]
+set password [lindex $argv 1]
+set hostname [lindex $argv 2]
+log_user 0
+
+if {[llength $argv] == 0} {
+  send_user "Usage: scriptname username \'password\' hostname\n"
+  exit 1
+}
+
+send_user "\n#####\n# $hostname\n#####\n"
+
+spawn ssh -q -o StrictHostKeyChecking=no $username@$hostname
+
+expect {
+  timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+  eof { send_user "\nSSH failure for $hostname\n"; exit 1 }
+  "*assword"
+}
+
+send "$password\r"
+
+expect {
+  timeout { send_user "\nLogin failed. Password incorrect.\n"; exit 1}
+  "*\$ "
+}
+
+send_user "\nPassword is correct\n"
+send "exit\r"
+close
+Let me describe what is going on in this script line by line.
+
+Line 1 executes the start of the script with the path to the expect binary.
+
+Line 2 sets a timeout for each expect statement to 9 seconds.
+
+Line 3,4,5 set variables for username, password, and hostname which are taken from the command line for when the script is run.
+
+Line 6 turns off the output to STDOUT (printing the output to the screen). If we remove this line you will see the whole login process.
+
+Line 8 is the first if statement. It checks to see if any arguments have been given to the script and if not it will print out how to use the script. If you do this with every script you will always be able to remind yourself of how to use it.
+
+Line 13 prints a banner with the hosts name.
+
+Line 15 starts the ssh process and turns on quiet mode and turns off host key checking (only turn off key checking on a trusted network). It uses the variables we give it on the command line to ssh to the host.
+
+Line 17 is our first expect statement. First we set our timeout message in case our expect statement can not find a match for what its looking for. According to our timeout we set this will occur in 9 seconds. This means it will loop through the ssh output for 9 seconds and if it can not find a match it will print this error an then exit as we have told it to do. We also set our EOF value here. If our ssh session does not connect or gets disconnected EOF will be returned and our error message will print. This will then exit like we tell it to do. The last and most important part of this statement is line 20 the pattern to match which is "*assword". This is a regular expression that looks for 0 or more characters with the letters assword after it. Many password login prompts for ssh show up as "Password: " so this should match that. If it does match then it moves to the next statement. If it does not match we will hit the timeout, then our error message will print and the script will exit.
+Line 23 will actually send the password we specified on the command line to ssh. We know we can send the password now because we verified we had a matching password prompt.
+Line 25 starts our next expect statement. We set the timeout error message to say that the login must be incorrect. Why? Because the matching loop has started again looking for output. This time we are looking for a command prompt. If we can not match a command prompt in the output then that means we never got one. That means our password must have failed. Line 27 after the timeout line is the matching expression "*\$ ". The prompt I was matching for looked like this "user@hostname:~$ ". So the match says 0 or more of any character (*) and then a dollar sign and then a space. Notice the dollar sign has a \ before it. We have to escape this because it is a special character for regular expressions which means end of line match. If we don't put the \ before the $ it will still work, but the match is to broad and matches anything. We want it to be a specific match to be sure it is a correct prompt so we want to look for any character with a $ and a space. Your prompts are likely to vary so change your matching expression to meet your needs.
+Line 30 sends output to the screen to tell the person the we got a correct prompt back. We can send this because we know we successfully got this far and our prompt matched from the previous expect statement.
+Line 31 and 32. Line 31 sends the exit command to the linux machine. Line 32 then closes the connection to the ssh process. That's it!
+This script uses command line arguments for a reason. If you can build your scripts like this then you can use it to check many different accounts across many different hosts. It does not lock you into one host and account per script. If you have a list of hosts you can use it in a bash loop and check many machines at once. Like: for x in server1 server2; do ./script.exp opt1 opt2 $x; done
+
+Notice we have to put the password on the command line with this script. First off make sure you put your passwords in single quotes. That removes any issue with special characters being interpreted by your shell. Second, is a bad idea to use password prompts on the command line because many shells (like bash) keep a history of your commands (like ~/.bash_history). That means your password is sitting in a file in plaintext in your home dir. That's bad. To help mitigate this with bash you can put the following line in your ~/.bashrc file or ~/.profile. "export HISTCONTROL=ignorespace" . This will then execute on login and after it is run will allow you to put a space before any command and it will not be kept in your history. The password will still be on your screen after you have run it but usually this is scrolled off soon after the script is run. Typing "clear" will scroll it off the current screen, but just keep it in mind.

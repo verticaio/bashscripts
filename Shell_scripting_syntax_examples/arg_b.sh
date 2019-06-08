@@ -1,0 +1,20 @@
+#!/bin/bash 
+
+echo "Bu ilk arq $1"
+echo "Bu second arq $2"
+echo "Bu ucuncu arq $3 " 
+echo "Bu ucuncu arq $4 "
+echo "Bu ucuncu arq $5 "
+echo "Bu ucuncu arq $6 "
+echo "Bu ucuncu arq $7 "
+echo "Bu ucuncu arq $8 "
+echo "Bu ucuncu arq $9 "
+echo "Bu ucuncu arq $10 "
+echo "Bu ucuncu arq $11 "
+echo "Bu ucuncu arq $12 "
+echo "Bu ucuncu arq $13 "
+echo "Bu ucuncu arq $15  "
+echo "Bu ucuncu arq $3 "
+echo "Bu ucuncu arq $3 "
+echo "Bu ucuncu arq $3 "
+

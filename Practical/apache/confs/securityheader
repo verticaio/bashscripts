@@ -1,0 +1,39 @@
+      # Security headers
+        Header always append X-Frame-Options SAMEORIGIN
+        Header always set X-Xss-Protection "1; mode=block"
+        Header always set X-Content-Type-Options nosniff
+#        Header always set Content-Security-Policy "default-src 'self' 'unsafe-inline' https://login.fimsa.az"
+        Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+        Header edit Set-Cookie ^((?!session_state).*)$ $1;HttpOnly
+        SetEnvIf User-Agent ".*MSIE.*" \
+                 nokeepalive ssl-unclean-shutdown \
+                 downgrade-1.0 force-response-1.0
+
+                # Unset X-ClientCert to make sure that we not get certificate in request
+        RequestHeader unset X-ClientCert
+
+                # Turn off support for true Proxy behaviour as we are acting as a transparent proxy
+        ProxyRequests Off
+
+                # Turn off VIA header as we know where the requests are proxied
+                ProxyVia Off
+
+                # Turn on Host header preservation so that the servlet container
+                # can write links with the correct host and rewriting can be avoided.
+                ProxyPreserveHost On
+
+
+
+
+ProxyAddHeaders Off
+theoretically disables it. In my experiences, it had no effect. However, combined with
+
+<Proxy *>
+  ProxyAddHeaders Off
+</Proxy>
+
+RequestHeader unset X-Forwarded-Host
+RequestHeader unset X-Forwarded-For
+RequestHeader unset X-Forwarded-Server
+https://www.silverstripe.org/download/security-releases/ss-2015-013/

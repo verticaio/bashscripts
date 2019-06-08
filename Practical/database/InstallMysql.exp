@@ -1,0 +1,23 @@
+#!/bin/bash
+DBPASSOLD=
+DBPASS=pass
+yum install expect -y
+yum install mariadb-server mariadb -y
+systemctl start mariadb 
+systemctl enable  mariadb
+/usr/bin/expect<<EOF
+set timeout -1
+spawn "mysql_secure_installation"
+expect "):"         {send "$DBPASSOLD\r"}
+expect "]"          {send "y\r"}
+expect "password:"  {send "$DBPASS\r"}
+expect "password:"  {send "$DBPASS\r"}
+expect "]"          {send "y\r"}
+expect "]"          {send "y\r"}
+expect "]"          {send "y\r"}
+expect "]"          {send "y\r"}
+expect "]"          {send "y\r"}
+expect "#"          {send  "exit\r"}
+#expect eof
+EOF
+exit 0
