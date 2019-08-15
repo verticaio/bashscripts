@@ -10,9 +10,16 @@ sed -i -r '/^\s*$/d' file.txt
 #Delete next line object and concanate all strings
 tr -d ‘\n’ < yourfile.txt
 
+
+# find  Uninterruptable process and watch them real time
+
 # Show connected ip addr to ports
 netstat -na | grep -iE 1521 | grep -iE -v listen |  awk '{print $5}' | cut -d: -f1 | uniq | sort
 
+
+## Share screen with any people
+screen -t preprod
+screen -x 
 
 # Show latest 5 high cpu usage 
 ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -5
