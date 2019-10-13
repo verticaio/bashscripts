@@ -1,34 +1,24 @@
 #!/bin/bash
-
 # Get Average CPU/Memory Utilization History from sysstat file in /var/log/sa/*
-
- 
- 
 for file in $(ls -la /var/log/sa/* | grep sa[0-9] | awk '{print $9}')
 do
         sar -f $file | head -n 1
         printf "\n"
- 
         # Get CPU idle average, it's pretty straight forward.
- 
         printf "CPU average: "
         sar -u -f $file | grep Average: | awk -F " " '{sum = (100 - $8) } END { print sum "%" }'
- 
         # Get Average Memory utilization
- 
         # Information being displayed in sar -r command is somewhat misleading.
         # As it is merely calculated by the formula kbmemused/(kbmemused+kbmemfree) * 100
         # But actually that was not the case, in order to get memory calculation, 
         # here's the revised formula to include memory cache/buffer information into account.
-        # 
+        #
         # Formula:
         # (kbmemused-kbbuffers-kbcached) / (kbmemfree + kbmemused) * 100
         # The reason behind this is Linux treats unused memory as a wasted resource and so uses as 
         # much RAM as it can to cache process/kernel information
-         
         printf "Memory Average: "
         sar -r -f $file | grep Average | awk -F " " '{ sum = ($3-$5-$6)/($2+$3) * 100   } END { print sum "%" }'
- 
         printf "\n"
 done
 
