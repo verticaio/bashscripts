@@ -9,7 +9,7 @@
 # For learning more about signal pls type "man 7 signal" command
 clear
 
-trap 'echo " - Please Press Q to Exit.." ' SIGINT SIGTERM  SIGTSTP   SIGKILL     # Yeni SIGINT ve ya SIGTERM signal bash vererse o zaman tek dirnaqdaki mesaji ver
+trap 'echo " - Please Press Q to Exit.." ' SIGINT SIGTERM  SIGTSTP   SIGKILL  SIGHUP   SIGKILL   # Yeni SIGINT ve ya SIGTERM signal bash vererse o zaman tek dirnaqdaki mesaji ver
 
 while [ "$CHOICE" != "Q" ] && [ "$CHOICE" != "q" ];
 do
